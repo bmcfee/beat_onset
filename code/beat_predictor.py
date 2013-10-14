@@ -129,7 +129,9 @@ def process_file(input_file, **kwargs):
 
     with open(input_file, 'r') as f:
         S = pickle.load(f)[SPECMAP[kwargs['spectrogram']]]
-        S = S / S.max()
+        Z = S.max()
+        if Z > 0:
+            S = S / Z
 
     onset = get_odf(**kwargs)
     tempo, beats = librosa.beat.beat_track( onsets=onset(S, q=kwargs['quantile']),
