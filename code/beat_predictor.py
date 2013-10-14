@@ -91,18 +91,19 @@ def process_args():
 
 def get_odf(**kw):
 
+    odf = None
+
     if kw['log']:
         if kw['quantile'] is None:
-            return onset_log_sum
+            odf = onset_log_sum
         else:
-            return onset_log_quantile
+            odf = onset_log_quantile
     else:
         if kw['quantile'] is None:
-            return onset_linear_sum
+            odf = onset_linear_sum
         else:
-            return onset_linear_quantile
-
-    raise ValueError('Could not determine ODF')
+            odf = onset_linear_quantile
+    return odf
 
 def process_file(input_file, **kwargs):
 
