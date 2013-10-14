@@ -26,7 +26,9 @@ SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4}
 def boxify(odf):
 
     odf = odf - odf.min()
-    return odf / odf.max()
+    if odf.max() > 0:
+        odf = odf / odf.max()
+    return odf 
 
 def onset_linear_sum(S, *args, **kwargs):
 
