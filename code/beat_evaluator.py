@@ -14,7 +14,7 @@ from joblib import Parallel, delayed
 
 # bins for information gain, set to match holzapfel'12
 N_BINS = 40
-MIN_BEAT_TIME = 0.0
+MIN_BEAT_TIME = 5.0
 HEADER = 'Cemgil, CMLc, CMLt, AMLc, AMLt, F-Meas, Goto, I.Gain, P_score'
 def process_file(input_file, **kw):
 
