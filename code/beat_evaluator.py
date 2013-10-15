@@ -22,10 +22,10 @@ def process_file(input_file, **kw):
     raw = raw.split(os.path.extsep)[0]
     truth_file = os.path.sep.join([kw['truth_path'], os.path.extsep.join([raw, 'txt'])])
 
-    prediction  = np.loadtxt(input_file)
     truth       = np.loadtxt(truth_file)
+    try:
+        prediction  = np.loadtxt(input_file)
 
-    if len(prediction) > 0:
         scores = []
         scores.append(MEB.cemgil(truth, prediction)[0])
         scores.extend(MEB.continuity(truth, prediction))
@@ -34,7 +34,8 @@ def process_file(input_file, **kw):
         scores.append(MEB.information_gain(truth, prediction))
         scores.append(MEB.p_score(truth, prediction))
         scores = np.array([scores])
-    else:
+    except:
+        print 'Empty prediction file: ', raw
         scores = np.zeros((1,9))
 
     np.savetxt(output_file, scores, delimiter=',', fmt='%0.4f', header=HEADER)
