@@ -12,7 +12,8 @@ import mir_eval.beat as MEB
 
 from joblib import Parallel, delayed
 
-
+# bins for information gain, set to match holzapfel'12
+N_BINS = 40
 HEADER = 'Cemgil, CMLc, CMLt, AMLc, AMLt, F-Meas, Goto, I.Gain, P_score'
 def process_file(input_file, **kw):
 
@@ -31,7 +32,7 @@ def process_file(input_file, **kw):
         scores.extend(MEB.continuity(truth, prediction))
         scores.append(MEB.f_measure(truth, prediction))
         scores.append(MEB.goto(truth, prediction))
-        scores.append(MEB.information_gain(truth, prediction))
+        scores.append(MEB.information_gain(truth, prediction, bins=N_BINS))
         scores.append(MEB.p_score(truth, prediction))
         scores = np.array([scores])
     except:
