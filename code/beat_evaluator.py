@@ -25,14 +25,17 @@ def process_file(input_file, **kw):
     prediction  = np.loadtxt(input_file)
     truth       = np.loadtxt(truth_file)
 
-    scores =[]
-    scores.append(MEB.cemgil(truth, prediction)[0])
-    scores.extend(MEB.continuity(truth, prediction))
-    scores.append(MEB.f_measure(truth, prediction))
-    scores.append(MEB.goto(truth, prediction))
-    scores.append(MEB.information_gain(truth, prediction))
-    scores.append(MEB.p_score(truth, prediction))
-    scores = np.array([scores])
+    if len(prediction) > 0:
+        scores = []
+        scores.append(MEB.cemgil(truth, prediction)[0])
+        scores.extend(MEB.continuity(truth, prediction))
+        scores.append(MEB.f_measure(truth, prediction))
+        scores.append(MEB.goto(truth, prediction))
+        scores.append(MEB.information_gain(truth, prediction))
+        scores.append(MEB.p_score(truth, prediction))
+        scores = np.array([scores])
+    else:
+        scores = np.zeros((1,9))
 
     np.savetxt(output_file, scores, delimiter=',', fmt='%0.4f', header=HEADER)
     pass
