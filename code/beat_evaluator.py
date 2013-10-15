@@ -14,6 +14,7 @@ from joblib import Parallel, delayed
 
 # bins for information gain, set to match holzapfel'12
 N_BINS = 40
+MIN_BEAT_TIME = 0.0
 HEADER = 'Cemgil, CMLc, CMLt, AMLc, AMLt, F-Meas, Goto, I.Gain, P_score'
 def process_file(input_file, **kw):
 
@@ -28,12 +29,12 @@ def process_file(input_file, **kw):
         prediction  = np.loadtxt(input_file)
 
         scores = []
-        scores.append(MEB.cemgil(truth, prediction)[0])
-        scores.extend(MEB.continuity(truth, prediction))
-        scores.append(MEB.f_measure(truth, prediction))
-        scores.append(MEB.goto(truth, prediction))
-        scores.append(MEB.information_gain(truth, prediction, bins=N_BINS))
-        scores.append(MEB.p_score(truth, prediction))
+        scores.append(MEB.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
+        scores.extend(MEB.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(MEB.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(MEB.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME))
+        scores.append(MEB.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
         scores = np.array([scores])
     except:
         print 'Empty prediction file: ', raw
