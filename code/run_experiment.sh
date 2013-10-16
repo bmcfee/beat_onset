@@ -8,7 +8,8 @@ for DATA in rwcj jazz_roger mirex2006 smc_dataset2
 do
     for spec in sparse full harmonic percussive lowrank 
     do
-        for log in '' -l
+#         for log in '' -l -c
+        for log in -c
         do
             for quant in '' '-q 0.25' '-q 0.5' '-q 0.75'
             do 
