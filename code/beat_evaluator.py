@@ -8,6 +8,7 @@ import glob
 import argparse
 
 import numpy as np
+from mir_eval.util import multiline
 import mir_eval.beat as MEB
 
 from joblib import Parallel, delayed
@@ -16,6 +17,7 @@ from joblib import Parallel, delayed
 N_BINS = 40
 MIN_BEAT_TIME = 5.0
 HEADER = 'Cemgil, CMLc, CMLt, AMLc, AMLt, F-Meas, Goto, I.Gain, P_score'
+
 def process_file(input_file, **kw):
 
     # First, get the ground truth file
@@ -24,23 +26,30 @@ def process_file(input_file, **kw):
     raw = raw.split(os.path.extsep)[0]
     truth_file = os.path.sep.join([kw['truth_path'], os.path.extsep.join([raw, 'txt'])])
 
-    truth       = np.loadtxt(truth_file)
     try:
         prediction  = np.loadtxt(input_file)
 
-        scores = []
-        scores.append(MEB.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
-        scores.extend(MEB.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(MEB.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(MEB.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME))
-        scores.append(MEB.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores = np.array([scores])
+        #truth       = np.loadtxt(truth_file)
+        ALL_SCORES = []
+        for truth in multiline(truth_file):
+            scores = []
+            scores.append(MEB.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
+            scores.extend(MEB.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+            scores.append(MEB.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+            scores.append(MEB.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+            scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME))
+            scores.append(MEB.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+            scores = np.array([scores])
+            ALL_SCORES.append(scores)
+
+        ALL_SCORES = np.array(ALL_SCORES)
+        ALL_SCORES = np.mean(ALL_SCORES, axis=0)
+
     except:
         print 'Empty prediction file: ', raw
-        scores = np.zeros((1,9))
+        ALL_SCORES = np.zeros((1,9))
 
-    np.savetxt(output_file, scores, delimiter=',', fmt='%0.4f', header=HEADER)
+    np.savetxt(output_file, ALL_SCORES, delimiter=',', fmt='%0.4f', header=HEADER)
     pass
 
 def process_args():
