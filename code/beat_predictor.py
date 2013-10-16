@@ -18,6 +18,7 @@ from joblib import Parallel, delayed
 SR      = 22050
 N_FFT   = 2048
 HOP     = 64
+TIGHTNESS = 400
 
 # Order: 
 #   full, harmonic, percussive, lowrank, sparse
@@ -135,7 +136,7 @@ def process_file(input_file, **kwargs):
 
     onset = get_odf(**kwargs)
     tempo, beats = librosa.beat.beat_track( onsets=onset(S, q=kwargs['quantile']),
-                                            sr=SR, n_fft=N_FFT, hop_length=HOP)
+                                            sr=SR, n_fft=N_FFT, hop_length=HOP, tightness=TIGHTNESS)
 
     times = librosa.frames_to_time(beats, sr=SR, hop_length=HOP)
     np.savetxt(output_file, times, fmt='%0.3f', delimiter='\n')
