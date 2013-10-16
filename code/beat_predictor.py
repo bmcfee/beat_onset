@@ -38,6 +38,10 @@ def onset_linear_sum(S, *args, **kwargs):
 def onset_log_sum(S, *args, **kwargs):
 
     return onset_linear_sum(librosa.logamplitude(S / S.max()))
+
+def onset_cbrt_sum(S, *args, **kwargs):
+
+    return onset_linear_sum( (S / S.max()) ** (1./3) )
     
 def onset_linear_quantile(S, q=0.5):
 
@@ -46,6 +50,10 @@ def onset_linear_quantile(S, q=0.5):
 
 def onset_log_quantile(S, *args, **kwargs):
     return onset_linear_quantile(librosa.logamplitude(S / S.max()), *args, **kwargs)
+
+def onset_cbrt_quantile(S, *args, **kwargs):
+
+    return onset_linear_quantile( (S / S.max())**(1./3), *args, **kwargs)
 
 def process_args():
     
@@ -67,6 +75,13 @@ def process_args():
                             action      =   'store',
                             help        =   'Path to store computed files')
 
+    parser.add_argument(    '-c',
+                            '--cube-root',
+                            dest        =   'cbrt',
+                            required    =   False,
+                            action      =   'store_true',
+                            help        =   'Cube-root-scale the spectrogram')
+    
     parser.add_argument(    '-l',
                             '--log',
                             dest        =   'log',
@@ -101,6 +116,11 @@ def get_odf(**kw):
             odf = onset_log_sum
         else:
             odf = onset_log_quantile
+    elif kw['cbrt']:
+        if kw['quantile'] is None:
+            odf = onset_cbrt_sum
+        else:
+            odf = onset_cbrt_quantile
     else:
         if kw['quantile'] is None:
             odf = onset_linear_sum
@@ -115,6 +135,8 @@ def process_file(input_file, **kwargs):
 
     if kwargs['log']:
         output_file = os.path.extsep.join([output_file, 'log'])
+    elif kwargs['cbrt']:
+        output_file = os.path.extsep.join([output_file, 'cbrt'])
     else:
         output_file = os.path.extsep.join([output_file, 'linear'])
 
