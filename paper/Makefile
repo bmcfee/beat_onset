@@ -1,4 +1,4 @@
-SRC = rpcabeat
+SRC = beats
 
 all: $(SRC).tex
 	latex $<
