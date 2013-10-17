@@ -22,7 +22,7 @@ TIGHTNESS = 400
 
 # Order: 
 #   full, harmonic, percussive, lowrank, sparse
-SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4}
+SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4, 'hp': 5}
 
 def boxify(odf):
 
