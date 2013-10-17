@@ -38,7 +38,7 @@ def process_file(input_file):
     with open(input_file, 'r') as f:
         SPECS = pickle.load(f)
 
-    SPECS.append(np.vstack((SPECS[1], SPECS[2])))
+    SPECS = SPECS + (np.vstack((SPECS[1], SPECS[2])),)
 
     with open(input_file, 'w') as f:
         pickle.dump(SPECS, f, protocol=-1)
