@@ -61,13 +61,13 @@ Music information retrieval, beat tracking
 \label{sec:intro}
 Beat-tracking --- the detection of ``pulse'' or salient, rhythmic events in a musical 
 performance --- is a fundamental problem in music content analysis. Automatic 
-beat-detection methods are widely used as part of chord detection, cover song detection, 
+beat-detection methods are often used for chord recognition, cover song detection, 
 structural segmentation, transcription, and numerous other applications. A large body of 
-literature has developed over the past two decades, and each year sees numerous submissions 
-to the Music Information Retrieval Evaluation eXchange (MIREX) beat tracking 
+literature has developed over the past two decades, and each year sees numerous 
+submissions to the Music Information Retrieval Evaluation eXchange (MIREX) beat tracking 
 evaluation~\cite{Downie2008}.
 
-Broadly speaking, common beat tracking methods operate in two stages.  First, the 
+A common general strategy for beat tracking operates in two stages.  First, the 
 audio signal is processed by an onset strength function, which measures the likelihood 
 that a musically salient change (\eg, note onset) has occurred at each time point.  
 The tracking algorithm then selects the beat times from among the peaks of the onset 
@@ -79,7 +79,7 @@ As we will demonstrate, the behavior of standard onset detectors tends to be dom
 the loudest events, typically produced by predominant or foreground instruments and 
 performers.  In many styles of western, popular music --- \eg, rock, dance, or pop --- 
 this presents no difficulty. Often, the beat is unambiguously driven by percussion or 
-foreground instrumentation, resulting in fairly clear rhythmic patterns which are amenable 
+foreground instrumentation, resulting in clear rhythmic patterns which are amenable 
 to signal analysis. 
 % As a result, beat detection in these genres is easily solved by prior 
 % work.
@@ -92,7 +92,7 @@ In such cases, we would hope that a beat tracker would adaptively tune out the f
 instrumentation and focus on the rhythmically salient portion of the signal.
 
 Reliable detection and separation of rhythmic elements in a recording can be quite
-difficult to achieve in practice.  Humans can easily tap along to a
+difficult to achieve in practice.  Humans can tap along to a
 performance and adapt to sudden changes in instrumentation (\eg, a drum solo), but 
 this behavior is difficult for an algorithm to emulate.
 
@@ -113,7 +113,7 @@ evaluate a wide variety of different approaches to detecting onset events.
 Escalona-Espinosa applied harmonic-percussive separation to beat-tracking, and derived beat 
 times from the self-similarity over features extracted from the different 
 components~\cite{escalona2008downbeat}.  The approach taken in this work is rather
-different, as we evaluate onset detectors derived purely from a single component of a
+different, as we evaluate onset detectors derived from a single component of a
 spectrogram decomposition.
 
 Peeters~\cite{peeters2005time} and Wu \etal~\cite{wu2011two} highlight tempo variation as a 
@@ -155,7 +155,7 @@ difference to determine the onset strength at time $t$:
 \end{equation}
 where $S \in \R_+^{d\times T}$ denotes the (Mel-scaled) magnitude spectrogram.  
 This function effectively measures increasing spectral energy over time across 
-\emph{any} frequency band $f$, and its magnitude is directly proportional to the 
+\emph{any} frequency band $f$, and its magnitude scales in proportion to the 
 difference.
 
 Note that $\omega_s$ can respond equally to either a large fluctuation confined to a 
@@ -180,8 +180,8 @@ simultaneously.\footnote{In preliminary experiments, alternative quantile estima
 \label{sec:spectrogram}
 
 In a typical musical recording, multiple instruments will play simultaneously. When
-all instruments (generally, sound sources) are synchronized, directly computing onsets
-from the spectrogram is likely to work well.  
+all instruments (generally, sound sources) are synchronized, computing onsets
+directly from the spectrogram is likely to work well.  
 However, if one or more sources play out of sync from each-other, it becomes difficult
 to differentiate the rhythmically meaningful onsets from the off-beat events.  This
 motivates the use of source separation techniques to help isolate the sources of beat
@@ -214,7 +214,7 @@ component $H$ is recovered by ${H=S-P}$.
 In the context of beat tracking, it may be reasonable to use either $H$ or $P$ as the
 input spectrogram, depending on the particular instrumentation. While percussive
 instruments reliably indicate the beat in many genres (rock, dance, pop, \etc), this
-phenomenon is far from universal, especially when the signal lacks percussion entirely
+phenomenon is far from universal, particularly when the signal lacks percussion 
 (\eg, a solo piano).
 
 \subsection{Robust principal components analysis}
@@ -296,6 +296,11 @@ component outperforms the best-performing methods reported by Holzapfel~\etal{} 
 the AMLt and Information Gain metrics, and is within the range of statistically 
 equivalent scores for F-measure ($0.346$--$0.401$)~\cite{holzapfel2012}.
 
+Overall, the RPCA method (Low-rank) did not yield improvements over the HPSS method.
+This may be due to the fact that the dataset a large number of
+single-instrument recordings, where there is less obvious benefit to source separation
+methods.  
+
 \begin{table}
 \centering
 \caption{Beat tracker performance on SMC Dataset2.\label{tab:results:smc2}}
@@ -326,6 +331,10 @@ Klapuri \etal\hfill~\cite{klapuri2006analysis}
 
 \section{Conclusion}
 \label{sec:conclusion}
+We evaluated two complementary techniques for improving beat tracking.
+The proposed median-based onset aggregation yields substantial improvements in beat
+tracker accuracy over the previous, sum-based method.  
+
 
 \bibliographystyle{IEEEbib}
 \bibliography{refs}
