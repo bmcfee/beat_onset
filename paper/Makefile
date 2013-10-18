@@ -16,7 +16,7 @@ gray: $(SRC).pdf
 
 
 clean:
-	rm -f *.aux *.log
+	rm -f *.aux *.log *.out
 
 spotless: clean
 	rm -f *.dvi *.bak *.bbl *.blg
