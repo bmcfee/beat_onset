@@ -5,7 +5,9 @@
 \documentclass{article}
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{graphicx}
+\usepackage{cite}
 \usepackage{url}
+\usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{booktabs}
 \usepackage{brian}
@@ -16,8 +18,8 @@
 %
 % Single address.
 % ---------------
-\name{Author Names\thanks{Thanks to XYZ agency for funding.}}
-\address{Author Affiliations}
+% \name{Author Names\thanks{Thanks to XYZ agency for funding.}}
+% \address{Author Affiliations}
 %
 % For example:
 % ------------
@@ -27,16 +29,14 @@
 %
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
-%\twoauthors
-%  {A. Author-one, B. Author-two\sthanks{Thanks to XYZ agency for funding.}}
-%   {School A-B\\
-%   Department A-B\\
-%   Address A-B}
-%  {C. Author-three, D. Author-four\sthanks{The fourth author performed the work
-%   while at ...}}
-%   {School C-D\\
-%   Department C-D\\
-%   Address C-D}
+\twoauthors%
+ {Brian McFee}{ Center for Jazz Studies\\
+      Columbia University\\
+  \texttt{brm2132@columbia.edu}}%
+ {Daniel P.W. Ellis}{
+  LabROSA, Department of Electrical Engineering\\
+      Columbia University\\
+  \texttt{dpwe@columbia.edu}}
 %
 \begin{document}
 %\ninept
@@ -44,7 +44,13 @@
 \maketitle
 %
 \begin{abstract}
-Beat tracking is awesome.
+Onset detection forms the critical first stage of most beat tracking algorithms.
+While common spectral-difference onset detectors can work well in genres with clear 
+rhythmic structure, they can be sensitive to loud, asynchronous events (\eg, off-beat 
+notes in a jazz solo), which limits their general efficacy. In this paper, we investigate 
+methods to improve the robustness of onset detection for beat tracking. 
+Experimental results indicate that simple modifications to onset detection can result
+in dramatic improvements to beat tracking accuracy.
 \end{abstract}
 %
 \begin{keywords}
@@ -53,39 +59,206 @@ Music information retrieval, beat tracking
 %
 \section{Introduction}
 \label{sec:intro}
+Beat-tracking --- the detection of ``pulse'' or salient, rhythmic events in a musical 
+performance --- is a fundamental problem in music content analysis. Automatic 
+beat-detection methods are widely used as part of chord detection, cover song detection, 
+structural segmentation, transcription, and numerous other applications. A large body of 
+literature has developed over the past two decades, and each year sees numerous submissions 
+to the Music Information Retrieval Evaluation eXchange (MIREX) beat tracking 
+evaluation~\cite{Downie2008}.
+
+Broadly speaking, common beat tracking methods operate in two stages.  First, the 
+audio signal is processed by an onset strength function, which measures the likelihood 
+that a musically salient change (\eg, note onset) has occurred at each time point.  
+The tracking algorithm then selects the beat times from among the peaks of the onset 
+strength profile.
+
+% FIXME:  2013-10-17 17:20:33 by Brian McFee <brm2132@columbia.edu>
+%  Clean this up
+As we will demonstrate, the behavior of standard onset detectors tends to be dominated by 
+the loudest events, typically produced by predominant or foreground instruments and 
+performers.  In many styles of western, popular music --- \eg, rock, dance, or pop --- 
+this presents no difficulty. Often, the beat is unambiguously driven by percussion or 
+foreground instrumentation, resulting in fairly clear rhythmic patterns which are amenable 
+to signal analysis. 
+% As a result, beat detection in these genres is easily solved by prior 
+% work.
+
+The assumption that beat derives from the predominant foreground instrumentation does not 
+hold in general across diverse categories of music. As a concrete example, a soloist in a 
+jazz combo may play a syncopated rhythm, or off-beat for aesthetic or expressive purposes, 
+while the accompaniment maintains a steady pulse in the background.  
+In such cases, we would hope that a beat tracker would adaptively tune out the foreground 
+instrumentation and focus on the rhythmically salient portion of the signal.
+
+Reliable detection and separation of rhythmic elements in a recording can be quite
+difficult to achieve in practice.  Humans can easily tap along to a
+performance and adapt to sudden changes in instrumentation (\eg, a drum solo), but 
+this behavior is difficult for an algorithm to emulate.
+
+\subsection{Our contributions}
+In this work, we investigate two complementary techniques to improve the robustness of 
+beat tracking and onset detection. First, we examine two spectrogram decomposition 
+methods to separate the signal into distinct components, allowing the onset detector to 
+suppress noisy or arrhythmic events. Second, we propose median-onset aggregation, which 
+captures temporally synchronous onsets, and is robust to spurious, large deviations in 
+spectral flux.
 
 \section{Related work}
 \label{sec:related}
-\cite{holzapfel2012}
+Onset detection is a well-studied problem in music information retrieval, and a full
+summary of recent work on the subject lies well beyond the scope of this paper.
+Within the context of beat-tracking, the surveys by Bello \etal~\cite{bello2005tutorial}
+and Collins~\cite{collins2005comparison} provide general introductions to the topic, and
+evaluate a wide variety of different approaches to detecting onset events.  
 
-\section{Onset detection and aggregation}
+Escalona-Espinosa applied harmonic-percussive separation to beat-tracking, and derived beat 
+times from the self-similarity over features extracted from the different 
+components~\cite{escalona2008downbeat}.  The approach taken in this work is rather
+different, as we evaluate onset detectors derived purely from a single component of a
+spectrogram decomposition.
+
+Peeters~\cite{peeters2005time} and Wu \etal~\cite{wu2011two} highlight tempo variation as a 
+key challenge in beat tracking. While tempo variation is indeed a challenge, our focus here 
+is on improving the detection of salient onset events; the tracking algorithm used in
+this work maintains a fixed tempo estimate for the duration of the track, but allows for
+deviation from the tempo.
+
+Alonso \etal~\cite{alonso2004tempo} and Bello \etal~\cite{bello2005tutorial} propose using 
+temporal median-filtering of the onset strength envelope to reduce noise and suppress
+spurious onset events.  Temporal smoothing differs from the median-aggregation method 
+proposed in this work, which instead filters across frequencies at each time step prior to
+constructing the onset envelope.
+
+This article addresses the early stages of beat tracking.  Rather
+than develop a new framework from scratch, we chose to modify the method
+proposed by Ellis~\cite{ellis2007beat}, which operates in three stages:
+\begin{enumerate}\addtolength{\itemsep}{-0.60\baselineskip}
+\item compute an onset strength envelope $\omega(t)$,
+\item estimate the tempo by picking peaks in the windowed auto-correlation of $\omega(t)$,
+and
+\item select beats consistent with the estimated tempo from the peaks of $\omega(t)$ by 
+dynamic programming.
+\end{enumerate}
+Keeping steps 2--3 fixed allows us to evaluate the contribution to accuracy due to the
+choice of onset strength function.
+We expect that improvements to onset detection can be applied to benefit other beat
+tracking architectures.
+
+\section{Onset strength aggregation}
 \label{sec:onsets}
+The general class of onset detector functions we consider is based on \emph{spectral 
+difference}, \ie, measuring the change in spectral energy across frequency bands in 
+successive spectrogram frames~\cite{bello2005tutorial}. The tracker 
+of Ellis~\cite{ellis2007beat} uses the sum across bands of thresholded log-magnitude
+difference to determine the onset strength at time $t$:
+\begin{equation}
+\omega_s(t) \defeq \sum_f \max(0, \log S_{f, t} - \log S_{f, t-1}),\label{eq:onset:sum}
+\end{equation}
+where $S(f,t)$ denotes the (Mel-scaled) magnitude spectrogram.  This function effectively 
+measures increasing spectral energy over time across \emph{any} frequency band $f$, and 
+its magnitude is directly proportional to the difference.  As a result, $\omega_s$ can be
+heavily influenced by large fluctuations.
+
+
+\subsection{Median onset aggregation}
+
+
+\section{Spectrogram decomposition}
+\label{sec:spectrogram}
+
+
+\subsection*{Harmonic-percussive source separation}
+\cite{fitzgerald2010harmonic}
+
+\subsection*{Robust principal components analysis}
+\cite{candes2011robust}
+\cite{yang2012sparse}
+
 
 \section{Evaluation}
 \label{sec:eval}
 
+To evaluate the proposed methods, we measured the alignment of detected beat events to 
+beat taps generated by human annotators.  Following previous work, we report the
+following standard beat tracking metrics~\cite{davies2009evaluation}:
+\begin{description}\addtolength{\itemsep}{-.75\baselineskip}
+\item[AMLt] (range: $[0, 1]$, larger is better) is a continuity-based metric that
+resolves predicted beats at different allowed metrical levels (AML), and is therefore 
+robust against doubling or halving of detected tempo;
+\item[F-measure] (range: $[0,1]$, larger is better) measures the precision and recall of ground truth beat events by the predictor; 
+\item[Information gain] (range: $[0, \cdot)$, larger is better) measures the mutual information (in bits) between the predicted beat sequence and the ground truth annotations.
+\end{description}
+Because different human annotators may produce beat sequences at
+different levels of granularity for the same track, meter-invariant measures such as
+AMLt and Information Gain are generally preferred; we include F-measure for
+completeness.
+
+Algorithms were evaluated on SMC Dataset2~\cite{holzapfel2012}, which contains 217
+40-second clips from a wide range of genres and instrumentations (classical, chanson, 
+blues, jazz, solo guitar, \etc).  This dataset was designed to consist primarily of 
+difficult examples, and represents the most challenging publicly available dataset for beat
+tracking evaluation.  We include comparisons to the best-performing methods reported by
+Holzapfel \etal~\cite{holzapfel2012}, and to the original implementation described by
+Ellis~\cite{ellis2007beat}.
+
+\subsection{Implementation}
+Each track was sampled at 22050Hz, and Mel-scaled magnitude spectrograms were computed 
+with a Hann-windowed short-time Fourier transform with 2048 samples ($\approx93$ms), hop 
+of 64 samples ($\approx3$ms), $d=128$ Mel bands, and a maximum frequency cutoff of 8000Hz.
+The HPSS window sizes were set as $w_p = w_h = 19$, and the power parameter was set 
+to $p=1.0$.
+Following Cand\`{e}s \etal~\cite{candes2011robust}, the RPCA parameter was set to
+${\alpha = \sqrt{T}}$, where $T$ denotes the number of frames.
+All algorithms were implemented in Python using \texttt{librosa}.\footnote{\url{http://github.com/bmcfee/librosa/}}
+
+\subsection{Results}
+
+\Cref{tab:results:smc2} lists the average scores achieved by the proposed methods on
+SMC Dataset2. 
+We first observe the gap in performance between \emph{sum-Full} and 
+Ellis~\cite{ellis2007beat}, which differ only in their choice of parameters: the 
+original implementation used a lower sampling rate (8000Hz), smaller window (256 samples) 
+and hop (32 samples, 4ms), and fewer Mel bands ($d=32$).\footnote{The present
+implementation also includes a small constant timing correction, which improves 
+performance for some metrics, but is known to not affect the information gain
+score~\cite{davies2009evaluation}.}
+Regardless of spectrogram decomposition method, all sum-based methods (first group of 
+results) perform comparably well, and although there are slight degradations, each give 
+a modest improvement over the original implementation.
+
+Replacing sum onset aggregation with median aggregation (second group of results)
+boosts performance uniformly: for each decomposition and each metric, median
+aggregation only improves the score.  The largest improvement is observed on the
+percussive-component, which achieved the lowest scores with sum aggregation, but the
+highest with median. Indeed, the combination of median aggregation with the percussive
+component outperforms the best-performing methods reported by Holzapfel~\etal{} for both 
+the AMLt and Information Gain metrics, and is within the range of statistically 
+equivalent scores for F-measure ($0.346$--$0.401$)~\cite{holzapfel2012}.
 
 \begin{table}
 \centering
-\label{tab:results:smc2}
-\caption{Beat tracker performance on SMC Dataset2~\cite{holzapfel2012}.}
+\caption{Beat tracker performance on SMC Dataset2.\label{tab:results:smc2}}
 \begin{tabular}{lrrr}
 \toprule%
-Algorithm   & AMLt  & F-measure & Information gain\\
+Algorithm   &    AMLt              & F-measure         & Inf.\ gain\\
 \hline
-sum-$S$     & 0.312 & 0.362     & 0.84             \\
-sum-$H$     & 0.313 & 0.363     & 0.84             \\
-sum-$P$     & 0.304 & 0.357     & 0.81             \\
-sum-$L$     & 0.310 & 0.357     & 0.84             \\
+sum-Full        & 0.312             & 0.362             & 0.84  \\
+sum-Harmonic    & 0.313             & 0.363             & 0.84  \\
+sum-Percussive  & 0.304             & 0.357             & 0.81  \\
+sum-Low-rank    & 0.310             & 0.357             & 0.84  \\
 \hline
-med-$S$     & 0.336 & 0.374     & 0.92             \\
-med-$H$     & 0.329 & 0.368     & 0.92             \\
-med-$P$     & \textbf{0.364} & 0.381     & \textbf{0.95}    \\
-med-$L$     & 0.331 & 0.376     & 0.90             \\
+med-Full        & 0.336             & 0.374             & 0.92  \\
+med-Harmonic    & 0.329             & 0.368             & 0.92  \\
+med-Percussive  & \textbf{0.364}    & 0.381             & \textbf{0.95}\\
+med-Low-rank    & 0.331             & 0.376             & 0.90  \\
 \hline
-Ellis~\cite{ellis2007beat} & 0.208 & 0.352 & 0.62\\
-B\"{o}ck~\cite{bock2011enhanced} & 0.261 & \textbf{0.401} & 0.91\\
-Klapuri~\cite{klapuri2006analysis} & 0.339 & 0.362 & 0.92\\
+Ellis\hfill~\cite{ellis2007beat} 
+                & 0.208             & 0.352             & 0.62  \\
+B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
+                & 0.261             & \textbf{0.401}    & 0.91  \\
+Klapuri \etal\hfill~\cite{klapuri2006analysis} 
+                & 0.339             & 0.362             & 0.92  \\
 \bottomrule%
 \end{tabular}
 
