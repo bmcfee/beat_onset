@@ -227,12 +227,12 @@ approximates $S$ by solving the following convex optimization problem
 \begin{equation}
 L \leftarrow \argmin_L \|L\|_* + \lambda \|S - L\|_1,
 \end{equation}
-where $\|\cdot\|_*$ indicates the nuclear-norm, $\|\cdot\|_1$ is the element-wise
+where $\|\cdot\|_*$ denotes the nuclear norm, $\|\cdot\|_1$ is the element-wise
 1-norm, and $\lambda>0$ is a trade-off parameter.
 
 In practice, the low-rank approximation tends to suppress pitch bends and vibrato,
 which are both common characteristics of vocals and may account for some of its success
-at vocal separation.  Pitch bends also tend to trigger spurious onset 
+at vocal separation.  Pitch bends can trigger spurious onset 
 detections due to lack of temporal continuity within each frequency band, and should
 therefore be suppressed for beat tracking.  
 

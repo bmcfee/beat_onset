@@ -27,7 +27,7 @@ WIN_P   = 19
 WIN_H   = 19
 HPSS_P  = 1.0
 
-RPCA_MAX_ITER = 25
+RPCA_MAX_ITER = 50
 
 def process_audio(infile):
 
