@@ -161,7 +161,7 @@ def process_file(input_file, **kwargs):
 
 
     with open(input_file, 'r') as f:
-        S = pickle.load(f)[SPECMAP[kwargs['spectrogram']]]
+        S = pickle.load(f)[SPECMAP[kwargs['spectrogram']]].astype(np.float32)
         if kwargs['median']:
             S = scipy.signal.medfilt2d(S, kernel_size=(1, MED_SIZE))
         Z = S.max()
