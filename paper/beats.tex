@@ -49,8 +49,8 @@ While common spectral-difference onset detectors can work well in genres with cl
 rhythmic structure, they can be sensitive to loud, asynchronous events (\eg, off-beat 
 notes in a jazz solo), which limits their general efficacy. In this paper, we investigate 
 methods to improve the robustness of onset detection for beat tracking. 
-Experimental results indicate that simple modifications to onset detection can result
-in dramatic improvements to beat tracking accuracy.
+Experimental results indicate that simple modifications to onset detection can produce
+large improvements in beat tracking accuracy.
 \end{abstract}
 %
 \begin{keywords}
@@ -99,7 +99,7 @@ this behavior is difficult for an algorithm to emulate.
 \subsection{Our contributions}
 In this work, we investigate two complementary techniques to improve the robustness of 
 beat tracking and onset detection. 
-First, we propose median onset aggregation, which captures temporally synchronous onsets, and is robust to spurious, large deviations in spectral flux.
+First, we propose median onset aggregation, which captures temporally synchronous onsets, and is robust to spurious, large spectral deviations.
 Second, we examine two spectrogram decomposition methods to separate the signal into distinct components, allowing the onset detector to suppress noisy or arrhythmic events. 
 
 \section{Related work}
@@ -293,13 +293,12 @@ aggregation only improves the score.  The largest improvement is observed on the
 percussive-component, which achieved the lowest scores with sum aggregation, but the
 highest with median. Indeed, the combination of median aggregation with the percussive
 component outperforms the best-performing methods reported by Holzapfel~\etal{} for both 
-the AMLt and Information Gain metrics, and is within the range of statistically 
-equivalent scores for F-measure ($0.346$--$0.401$)~\cite{holzapfel2012}.
+the AMLt and Information Gain metrics, and is within the range of F-measure scores 
+statistically equivalent to the best ($0.346$--$0.401$)~\cite{holzapfel2012}.
 
-Overall, the RPCA method (Low-rank) did not yield improvements over the HPSS method.
-This may be due to the fact that the dataset a large number of
-single-instrument recordings, where there is less obvious benefit to source separation
-methods.  
+The RPCA method (Low-rank) did not yield improvements over either the full spectrogram or HPSS methods.
+This may be due to the fact that the dataset a large number of single-instrument recordings, where there 
+is less obvious benefit to source separation methods.  
 
 \begin{table}
 \centering
@@ -313,8 +312,8 @@ sum-Harmonic    & 0.313             & 0.363             & 0.84  \\
 sum-Percussive  & 0.304             & 0.357             & 0.81  \\
 sum-Low-rank    & 0.310             & 0.357             & 0.84  \\
 \hline
-med-Full        & 0.336             & 0.374             & 0.92  \\
-med-Harmonic    & 0.329             & 0.368             & 0.92  \\
+med-Full        & 0.336             & 0.374             & \textbf{0.92}  \\
+med-Harmonic    & 0.329             & 0.368             & \textbf{0.92}  \\
 med-Percussive  & \textbf{0.364}    & 0.381             & \textbf{0.95}\\
 med-Low-rank    & 0.331             & 0.376             & 0.90  \\
 \hline

@@ -11,6 +11,7 @@ import cPickle as pickle
 
 import numpy as np
 import scipy.stats
+import scipy.signal
 import librosa
 
 from joblib import Parallel, delayed
@@ -19,6 +20,8 @@ SR      = 22050
 N_FFT   = 2048
 HOP     = 64
 TIGHTNESS = 400
+
+MED_SIZE = 5
 
 # Order: 
 #   full, harmonic, percussive, lowrank, sparse
@@ -97,6 +100,13 @@ def process_args():
                             default     =   None,
                             help        =   'Quantile threshold for onsets')
 
+    parser.add_argument(    '-m',
+                            '--median',
+                            dest        =   'median',
+                            required    =   False,
+                            action      =   'store_true',
+                            help        =   'median-filter the spectrogram')
+
     parser.add_argument(    '-s',
                             '--spectrogram',
                             dest        =   'spectrogram',
@@ -152,6 +162,8 @@ def process_file(input_file, **kwargs):
 
     with open(input_file, 'r') as f:
         S = pickle.load(f)[SPECMAP[kwargs['spectrogram']]]
+        if kwargs['median']:
+            S = scipy.signal.medfilt2d(S, kernel_size=(1, MED_SIZE))
         Z = S.max()
         if Z > 0:
             S = S / Z
