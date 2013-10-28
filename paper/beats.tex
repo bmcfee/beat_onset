@@ -183,10 +183,15 @@ across frequency bands with the median operator:
 \omega_m(t) \defeq \median_f \max(0, \log S_{f, t} - \log S_{f, t-1}).\label{eq:onset:median}
 \end{equation}
 This simple modification improves the robustness of the onset strength function to loud, 
-asynchronous events.  As illustrated by \Cref{fig:onsets}, the resulting onset envelope tends 
-to be sparser, since it can only produce non-zero values if more than half of the frequency 
-bins increase in energy simultaneously.\footnote{In preliminary experiments, alternative quantile estimators 
+asynchronous events.
+
+As illustrated by \Cref{fig:onsets}, the resulting onset envelope tends to be sparser, 
+since it can only produce non-zero values if more than half of the frequency bins 
+increase in energy simultaneously.  
+\footnote{In preliminary experiments, alternative quantile estimators 
 (25th and 75th percentile) were found to be inferior to median aggregation.}
+Consequently, pitch bends have a negligible effect on $\omega_m$, since their influence 
+is typically confined to a small subset of frequencies.  
 
 \section{Spectrogram decomposition}
 \label{sec:spectrogram}
@@ -261,7 +266,8 @@ where $\|\cdot\|_*$ denotes the nuclear norm, $\|\cdot\|_1$ is the element-wise
 
 In practice, the low-rank approximation tends to suppress pitch bends and vibrato,
 which are both common characteristics of vocals and may account for some of its success
-at vocal separation.  Pitch bends can trigger spurious onset 
+at vocal separation.  
+As shown in \Cref{fig:onsets}, pitch bends can trigger spurious onset 
 detections due to lack of temporal continuity within each frequency band, and should
 therefore be suppressed for beat tracking.  
 
@@ -305,7 +311,10 @@ All algorithms were implemented in Python using \texttt{librosa}.\footnote{\url{
 \subsection{Results}
 
 \Cref{tab:results:smc2} lists the average scores achieved by the proposed methods on
-SMC Dataset2. 
+SMC Dataset2.
+For each metric, methods which achieve statistical equivalence to the best performance are listed in bold.
+Statistical significance was determined with a Bonferroni-corrected Wilcoxon signed-rank test at level $\alpha=0.05$.
+
 We first observe the gap in performance between \emph{sum-Full} and 
 Ellis~\cite{ellis2007beat}, which differ only in their choice of parameters: the 
 original implementation used a lower sampling rate (8000Hz), smaller window (256 samples) 
@@ -320,14 +329,12 @@ a modest improvement over the original implementation.
 Replacing sum onset aggregation with median aggregation (second group of results)
 boosts performance uniformly: for each decomposition and each metric, median
 aggregation only improves the score.  The largest improvement is observed on the
-percussive-component, which achieved the lowest scores with sum aggregation, but the
-highest with median. Indeed, the combination of median aggregation with the percussive
-component outperforms the best-performing methods reported by Holzapfel~\etal{} for both 
-the AMLt and Information Gain metrics, and is within the range of F-measure scores 
-statistically equivalent to the best ($0.346$--$0.401$)~\cite{holzapfel2012}.
+percussive component, which achieved the lowest scores with sum aggregation, but the
+highest with median aggregation. Across all metrics, the combination of median aggregation with 
+the percussive component ties for the highest score among all methods.
 
 The RPCA method (Low-rank) did not yield improvements over either the full spectrogram or HPSS methods.
-This may be due to the fact that the dataset contains a large number of single-instrument recordings, 
+This may be due to the fact that the dataset consists primarily of instrumental (even single-instrument) recordings, 
 where there is less obvious benefit to source separation methods.  
 
 \begin{table}[t]
@@ -390,9 +397,10 @@ Klapuri \etal\hfill~\cite{klapuri2006analysis}
 
 \section{Conclusion}
 \label{sec:conclusion}
-We evaluated two complementary techniques for improving beat tracking.
+We evaluated two complementary techniques for improving beat tracking: onset aggregation, and spectrogram decomposition.
 The proposed median-based onset aggregation yields substantial improvements in beat
-tracker accuracy over the previous, sum-based method.  
+tracker accuracy over the previous, sum-based method. 
+Combining median onset aggregation with percussive separation results in the best performance on the SMC2 dataset.
 
 
 \bibliographystyle{IEEEbib}
