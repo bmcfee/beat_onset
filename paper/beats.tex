@@ -30,7 +30,8 @@
 % Two addresses (uncomment and modify for two-address case).
 % ----------------------------------------------------------
 \twoauthors%
- {Brian McFee}{ Center for Jazz Studies\\
+ {Brian McFee\thanks{This work was supported by a grant from the Mellon foundation, and
+grant IIS-1117015 from the National Science Foundation (NSF).}}{ Center for Jazz Studies\\
       Columbia University\\
   \texttt{brm2132@columbia.edu}}%
  {Daniel P.W. Ellis}{
@@ -300,32 +301,58 @@ The RPCA method (Low-rank) did not yield improvements over either the full spect
 This may be due to the fact that the dataset a large number of single-instrument recordings, where there 
 is less obvious benefit to source separation methods.  
 
-\begin{table}
+\begin{table}[t]
 \centering
 \caption{Beat tracker performance on SMC Dataset2.\label{tab:results:smc2}}
 \begin{tabular}{lrrr}
 \toprule%
-Algorithm   &    AMLt              & F-measure         & Inf.\ gain\\
+Algorithm   &    AMLt               & F-measure         & Inf.\ gain\\
 \hline
-sum-Full        & 0.312             & 0.362             & 0.84  \\
-sum-Harmonic    & 0.313             & 0.363             & 0.84  \\
-sum-Percussive  & 0.304             & 0.357             & 0.81  \\
-sum-Low-rank    & 0.310             & 0.357             & 0.84  \\
+sum-Full        & \textbf{0.312}    & 0.362             & 0.839  \\
+sum-Harmonic    & \textbf{0.313}    & 0.363             & 0.835  \\
+sum-Percussive  & \textbf{0.304}    & 0.357             & 0.811  \\
+sum-Low-rank    & \textbf{0.310}    & 0.357             & 0.832  \\
 \hline
-med-Full        & 0.336             & 0.374             & \textbf{0.92}  \\
-med-Harmonic    & 0.329             & 0.368             & \textbf{0.92}  \\
-med-Percussive  & \textbf{0.364}    & 0.381             & \textbf{0.95}\\
-med-Low-rank    & 0.331             & 0.376             & 0.90  \\
+med-Full        & \textbf{0.336}    & 0.374             & \textbf{0.916}  \\
+med-Harmonic    & 0.329             & 0.368             & \textbf{0.916}  \\
+med-Percussive  & \textbf{0.364}    & \textbf{0.381}    & \textbf{0.946}\\
+med-Low-rank    & 0.331             & 0.376             & 0.901  \\
 \hline
 Ellis\hfill~\cite{ellis2007beat} 
-                & 0.208             & 0.352             & 0.62  \\
+                & 0.208             & 0.352             & 0.607  \\
 B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
-                & 0.261             & \textbf{0.401}    & 0.91  \\
+                & 0.261             & \textbf{0.401}    & \textbf{0.917}  \\
 Klapuri \etal\hfill~\cite{klapuri2006analysis} 
-                & 0.339             & 0.362             & 0.92  \\
+                & 0.339             & 0.362             & \textbf{0.926}  \\
 \bottomrule%
 \end{tabular}
+\end{table}
 
+\begin{table}[t]
+\centering
+\caption{Performance on SMC Dataset2 --- Hard subset.\label{tab:results:smc2hard}}
+\begin{tabular}{lrrr}
+\toprule%
+Algorithm       & AMLt      & F-measure     & Inf.\ gain\\
+\hline
+sum-Full        & \textbf{0.280}     & 0.330         & 0.713 \\
+sum-Harmonic    & \textbf{0.281}     & 0.332         & 0.712 \\
+sum-Percussive  & \textbf{0.270}     & 0.324         & 0.677 \\
+sum-Low-rank    & \textbf{0.270}     & 0.321         & 0.693 \\
+\hline
+med-Full        & \textbf{0.303}     & 0.343         & \textbf{0.779} \\
+med-Harmonic    & 0.296     & 0.337         & \textbf{0.780} \\
+med-Percussive  & \textbf{0.333}     & \textbf{0.355}         & \textbf{0.808} \\
+med-Low-rank    & 0.296     & 0.340         & 0.763 \\
+\hline
+Ellis\hfill~\cite{ellis2007beat} 
+                & 0.157     & 0.321         & 0.461 \\
+B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
+                & 0.230     & \textbf{0.368}         & \textbf{0.768} \\
+Klapuri \etal\hfill~\cite{klapuri2006analysis} 
+                & 0.285     & 0.318         & 0.713 \\
+\bottomrule%
+\end{tabular}
 \end{table}
 
 \section{Conclusion}
