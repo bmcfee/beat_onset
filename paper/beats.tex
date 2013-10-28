@@ -152,7 +152,7 @@ tracking architectures.
 \includegraphics[width=\columnwidth]{figs/onsets}%
 \vspace{-\baselineskip}%
 \caption{An example spectrogram (top) derived from five seconds of vocals, piano, and drums.  
-Sum across frequency bands to derive onset strength (middle) results in spurious peaks due to vibrato.
+Sum across frequency bands to derive onset strength (middle) results in spurious peaks due to pitch bends and vibrato.
 Median aggregation (bottom) produces a sparser onset strength function, and retains the salient peaks.}
 \label{fig:onsets}
 \end{figure}
@@ -195,11 +195,11 @@ bins increase in energy simultaneously.\footnote{In preliminary experiments, alt
 \centering%
 \includegraphics[width=\textwidth]{figs/specgrams}%
 \vspace{-\baselineskip}%
-\caption{Examples of each spectrogram decomposition method: 
-(a) 6.5s of the original (Mel-scaled) spectrogram, consisting of guitar, bass, drums, and vocals; 
+\caption{Examples of spectrogram decomposition methods: 
+(a) five seconds of a (Mel-scaled) spectrogram, consisting of guitar, bass, drums, and vocals; 
 (b) the harmonic component emphasizes sustained tones (horizontal lines); 
 (c) the percussive emphasizes transients (vertical lines); 
-(d) the low-rank component retains horizontals and verticals, but suppresses vocals.}
+(d) the low-rank component retains harmonics and percussives, but suppresses vocal glides.}
 \label{fig:specgrams}
 \end{figure*}
 
