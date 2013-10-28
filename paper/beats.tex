@@ -150,7 +150,7 @@ tracking architectures.
 \begin{figure}
 \centering%
 \includegraphics[width=\columnwidth]{figs/onsets}%
-\vspace{-\baselineskip}
+\vspace{-\baselineskip}%
 \caption{An example spectrogram (top) derived from five seconds of vocals, piano, and drums.  
 Sum across frequency bands to derive onset strength (middle) results in spurious peaks due to vibrato.
 Median aggregation (bottom) produces a sparser onset strength function, and retains the salient peaks.}
@@ -183,9 +183,9 @@ across frequency bands with the median operator:
 \omega_m(t) \defeq \median_f \max(0, \log S_{f, t} - \log S_{f, t-1}).\label{eq:onset:median}
 \end{equation}
 This simple modification improves the robustness of the onset strength function to loud, 
-asynchronous events.  The resulting onset envelope tends to be sparser, since it can only 
-produce non-zero values if more than half of the frequency bins increase in energy 
-simultaneously.\footnote{In preliminary experiments, alternative quantile estimators 
+asynchronous events.  As illustrated by \Cref{fig:onsets}, the resulting onset envelope tends 
+to be sparser, since it can only produce non-zero values if more than half of the frequency 
+bins increase in energy simultaneously.\footnote{In preliminary experiments, alternative quantile estimators 
 (25th and 75th percentile) were found to be inferior to median aggregation.}
 
 \section{Spectrogram decomposition}
