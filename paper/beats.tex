@@ -100,7 +100,7 @@ this behavior is difficult for an algorithm to emulate.
 \subsection{Our contributions}
 In this work, we investigate two complementary techniques to improve the robustness of 
 beat tracking and onset detection. 
-First, we propose median onset aggregation, which captures temporally synchronous onsets, and is robust to spurious, large spectral deviations.
+First, we propose across-frequency median onset aggregation, which captures temporally synchronous onsets, and is robust to spurious, large spectral deviations.
 Second, we examine two spectrogram decomposition methods to separate the signal into distinct components, allowing the onset detector to suppress noisy or arrhythmic events. 
 
 \section{Related work}
@@ -146,6 +146,17 @@ tracking architectures.
 
 \section{Median onset aggregation}
 \label{sec:onsets}
+
+\begin{figure}
+\centering%
+\includegraphics[width=\columnwidth]{figs/onsets}%
+\vspace{-\baselineskip}
+\caption{An example spectrogram (top) derived from five seconds of vocals, piano, and drums.  
+Sum across frequency bands to derive onset strength (middle) results in spurious peaks due to vibrato.
+Median aggregation (bottom) produces a sparser onset strength function, and retains the salient peaks.}
+\label{fig:onsets}
+\end{figure}
+
 The general class of onset detector functions we consider is based on \emph{spectral 
 difference}, \ie, measuring the change in spectral energy across frequency bands in 
 successive spectrogram frames~\cite{bello2005tutorial}. The tracker 
@@ -180,6 +191,18 @@ simultaneously.\footnote{In preliminary experiments, alternative quantile estima
 \section{Spectrogram decomposition}
 \label{sec:spectrogram}
 
+\begin{figure*}
+\centering%
+\includegraphics[width=\textwidth]{figs/specgrams}%
+\vspace{-\baselineskip}%
+\caption{Examples of each spectrogram decomposition method: 
+(a) 6.5s of the original (Mel-scaled) spectrogram, consisting of guitar, bass, drums, and vocals; 
+(b) the harmonic component emphasizes sustained tones (horizontal lines); 
+(c) the percussive emphasizes transients (vertical lines); 
+(d) the low-rank component retains horizontals and verticals, but suppresses vocals.}
+\label{fig:specgrams}
+\end{figure*}
+
 In a typical musical recording, multiple instruments will play simultaneously. When
 all instruments (generally, sound sources) are synchronized, computing onsets
 directly from the spectrogram is likely to work well.  
@@ -187,7 +210,8 @@ However, if one or more sources play out of sync from each-other, it becomes dif
 to differentiate the rhythmically meaningful onsets from the off-beat events.  This
 motivates the use of source separation techniques to help isolate the sources of beat
 events.  In this work, we applied two different source-separation techniques which have
-been demonstrated to work well for musical signals.
+been demonstrated to work well for musical signals: harmonic-percussive source 
+separation~\cite{ono2008real}, and robust principal components analysis~\cite{candes2011robust}.
 
 \subsection{Harmonic-percussive source separation}
 Harmonic-percussive source separation (HPSS) describes the general class of algorithms
@@ -211,6 +235,10 @@ P_{f,t} &= S_{f,t} \left(\frac{ \pi_{f,t}^p }{\pi_{f,t}^p + \eta_{f,t}^p}\right)
 \end{align*}
 where $p>0$ is a scaling parameter (typically $p=1$ or $2$). Given $P$, the harmonic 
 component $H$ is recovered by ${H=S-P}$.
+
+\Cref{fig:specgrams}~(a--c) illustrates an example of HPSS on a short song excerpt.
+The harmonic component (b) retains most of the tonal content of the original signal (a),
+while the percussive component (c) retains transients.
 
 In the context of beat tracking, it may be reasonable to use either $H$ or $P$ as the
 input spectrogram, depending on the particular instrumentation. While percussive
@@ -260,7 +288,8 @@ Algorithms were evaluated on SMC Dataset2~\cite{holzapfel2012}, which contains 2
 blues, jazz, solo guitar, \etc).  This dataset was designed to consist primarily of 
 difficult examples, and represents the most challenging publicly available dataset for beat
 tracking evaluation.  We include comparisons to the best-performing methods reported by
-Holzapfel \etal~\cite{holzapfel2012}, and to the original implementation described by
+Holzapfel \etal~\cite{holzapfel2012} --- Degara \etal~\cite{degara2012reliability}, B\"{o}ck and Schedl~\cite{bock2011enhanced}, and
+Klapuri \etal~\cite{klapuri2006analysis} --- and to the original implementation described by
 Ellis~\cite{ellis2007beat}.
 
 \subsection{Implementation}
@@ -298,8 +327,8 @@ the AMLt and Information Gain metrics, and is within the range of F-measure scor
 statistically equivalent to the best ($0.346$--$0.401$)~\cite{holzapfel2012}.
 
 The RPCA method (Low-rank) did not yield improvements over either the full spectrogram or HPSS methods.
-This may be due to the fact that the dataset a large number of single-instrument recordings, where there 
-is less obvious benefit to source separation methods.  
+This may be due to the fact that the dataset contains a large number of single-instrument recordings, 
+where there is less obvious benefit to source separation methods.  
 
 \begin{table}[t]
 \centering
@@ -318,42 +347,46 @@ med-Harmonic    & 0.329             & 0.368             & \textbf{0.916}  \\
 med-Percussive  & \textbf{0.364}    & \textbf{0.381}    & \textbf{0.946}\\
 med-Low-rank    & 0.331             & 0.376             & 0.901  \\
 \hline
-Ellis\hfill~\cite{ellis2007beat} 
-                & 0.208             & 0.352             & 0.607  \\
 B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
                 & 0.261             & \textbf{0.401}    & \textbf{0.917}  \\
+Degara \etal\hfill~\cite{degara2012reliability}
+                & \textbf{0.334}    & 0.348             & 0.888  \\
+Ellis\hfill~\cite{ellis2007beat} 
+                & 0.208             & 0.352             & 0.607  \\
 Klapuri \etal\hfill~\cite{klapuri2006analysis} 
                 & 0.339             & 0.362             & \textbf{0.926}  \\
 \bottomrule%
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
-\centering
-\caption{Performance on SMC Dataset2 --- Hard subset.\label{tab:results:smc2hard}}
-\begin{tabular}{lrrr}
-\toprule%
-Algorithm       & AMLt      & F-measure     & Inf.\ gain\\
-\hline
-sum-Full        & \textbf{0.280}     & 0.330         & 0.713 \\
-sum-Harmonic    & \textbf{0.281}     & 0.332         & 0.712 \\
-sum-Percussive  & \textbf{0.270}     & 0.324         & 0.677 \\
-sum-Low-rank    & \textbf{0.270}     & 0.321         & 0.693 \\
-\hline
-med-Full        & \textbf{0.303}     & 0.343         & \textbf{0.779} \\
-med-Harmonic    & 0.296     & 0.337         & \textbf{0.780} \\
-med-Percussive  & \textbf{0.333}     & \textbf{0.355}         & \textbf{0.808} \\
-med-Low-rank    & 0.296     & 0.340         & 0.763 \\
-\hline
-Ellis\hfill~\cite{ellis2007beat} 
-                & 0.157     & 0.321         & 0.461 \\
-B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
-                & 0.230     & \textbf{0.368}         & \textbf{0.768} \\
-Klapuri \etal\hfill~\cite{klapuri2006analysis} 
-                & 0.285     & 0.318         & 0.713 \\
-\bottomrule%
-\end{tabular}
-\end{table}
+% \begin{table}[t]
+% \centering
+% \caption{Performance on SMC Dataset2 --- Hard subset.\label{tab:results:smc2hard}}
+% \begin{tabular}{lrrr}
+% \toprule%
+% Algorithm       & AMLt      & F-measure     & Inf.\ gain\\
+% \hline
+% sum-Full        & \textbf{0.280}     & 0.330         & 0.713 \\
+% sum-Harmonic    & \textbf{0.281}     & 0.332         & 0.712 \\
+% sum-Percussive  & \textbf{0.270}     & 0.324         & 0.677 \\
+% sum-Low-rank    & \textbf{0.270}     & 0.321         & 0.693 \\
+% \hline
+% med-Full        & \textbf{0.303}     & 0.343         & \textbf{0.779} \\
+% med-Harmonic    & 0.296     & 0.337         & \textbf{0.780} \\
+% med-Percussive  & \textbf{0.333}     & \textbf{0.355}         & \textbf{0.808} \\
+% med-Low-rank    & 0.296     & 0.340         & 0.763 \\
+% \hline
+% B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
+%                 & 0.230     & \textbf{0.368}         & \textbf{0.768} \\
+% Degara \etal\hfill~\cite{degara2012reliability}
+%                 & 0.283     & 0.304             & 0.684  \\
+% Ellis\hfill~\cite{ellis2007beat} 
+%                 & 0.157     & 0.321         & 0.461 \\
+% Klapuri \etal\hfill~\cite{klapuri2006analysis} 
+%                 & 0.285     & 0.318         & 0.713 \\
+% \bottomrule%
+% \end{tabular}
+% \end{table}
 
 \section{Conclusion}
 \label{sec:conclusion}
