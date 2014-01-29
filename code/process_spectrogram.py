@@ -23,39 +23,62 @@ HOP     = 64
 N_MELS  = 128
 FMAX    = 8000
 
-WIN_P   = 19
-WIN_H   = 19
-HPSS_P  = 1.0
+# HPSS Parameters
+KERNEL_SIZE = 31
+HPSS_P      = 2.0
 
 RPCA_MAX_ITER = 50
+
+def hpss(y):
+
+    D = librosa.stft(y)
+    H, P = librosa.decompose.hpss(D, kernel_size=KERNEL_SIZE, power=HPSS_P)
+
+    D_harm = np.abs(librosa.stft(librosa.istft(H), n_fft=N_FFT, hop_length=HOP))
+    D_perc = np.abs(librosa.stft(librosa.istft(P), n_fft=N_FFT, hop_length=HOP))
+
+    return D_harm, D_perc
 
 def process_audio(infile):
 
     y, sr = librosa.load(infile, sr=SR)
 
     # 1. Compute magnitude spectrogram
-    D = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP)).astype(np.float32)
-    D = D / D.max()
+    D = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP))
 
-    # 2. Compute mel filter bank
-    M = librosa.feature.melfb(sr, N_FFT, n_mels=N_MELS, fmax=FMAX)
-    M = M[:, :1+N_FFT/2].astype(np.float32)
+    # 2. Compute HPSS
+    Harm, Perc = hpss(y)
 
-    # 3. Compute HPSS
-
-    Harm, Perc = librosa.hpss.hpss_median(D, win_H=WIN_H, win_P=WIN_P, p=HPSS_P)
-
-    # 4. Compute RPCA
+    # 3. Compute RPCA
     Lowrank, Sparse, _ = rpca.robust_pca(D, max_iter=RPCA_MAX_ITER)
 
     Lowrank = np.maximum(0.0, Lowrank)
     Sparse  = np.maximum(0.0, Sparse)
 
-    S       = M.dot(D)
-    Harm    = M.dot(Harm)
-    Perc    = M.dot(Perc)
-    Lowrank = M.dot(Lowrank)
-    Sparse  = M.dot(Sparse)
+    S       = librosa.feature.melspectrogram(librosa.logamplitude(D, ref_power=D.max()), 
+                                             sr=sr,
+                                             n_mels=N_MELS,
+                                             fmax=FMAX)
+
+    Harm       = librosa.feature.melspectrogram(librosa.logamplitude(Harm, ref_power=Harm.max()), 
+                                             sr=sr,
+                                             n_mels=N_MELS,
+                                             fmax=FMAX)
+
+    Perc       = librosa.feature.melspectrogram(librosa.logamplitude(Perc, ref_power=Perc.max()), 
+                                             sr=sr,
+                                             n_mels=N_MELS,
+                                             fmax=FMAX)
+
+    Lowrank       = librosa.feature.melspectrogram(librosa.logamplitude(Lowrank, ref_power=Lowrank.max()), 
+                                             sr=sr,
+                                             n_mels=N_MELS,
+                                             fmax=FMAX)
+
+    Sparse       = librosa.feature.melspectrogram(librosa.logamplitude(Sparse, ref_power=Sparse.max()), 
+                                             sr=sr,
+                                             n_mels=N_MELS,
+                                             fmax=FMAX)
 
     return S, Harm, Perc, Lowrank, Sparse
 

@@ -10,8 +10,6 @@ import argparse
 import cPickle as pickle
 
 import numpy as np
-import scipy.stats
-import scipy.signal
 import librosa
 
 from joblib import Parallel, delayed
@@ -26,37 +24,6 @@ MED_SIZE = 5
 # Order: 
 #   full, harmonic, percussive, lowrank, sparse
 SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4, 'hp': 5}
-
-def boxify(odf):
-
-    odf = odf - odf.min()
-    if odf.max() > 0:
-        odf = odf / odf.max()
-    return odf 
-
-def onset_linear_sum(S, *args, **kwargs):
-
-    return boxify(np.sum(np.maximum(0.0, np.diff(S, axis=1)), axis=0))
-
-def onset_log_sum(S, *args, **kwargs):
-
-    return onset_linear_sum(librosa.logamplitude(S / S.max()))
-
-def onset_cbrt_sum(S, *args, **kwargs):
-
-    return onset_linear_sum( (S / S.max()) ** (1./3) )
-    
-def onset_linear_quantile(S, q=0.5):
-
-    D = np.maximum(0.0, np.diff(S, axis=1))
-    return boxify(np.array(scipy.stats.mstats.mquantiles(D, [q], axis=0)).flatten())
-
-def onset_log_quantile(S, *args, **kwargs):
-    return onset_linear_quantile(librosa.logamplitude(S / S.max()), *args, **kwargs)
-
-def onset_cbrt_quantile(S, *args, **kwargs):
-
-    return onset_linear_quantile( (S / S.max())**(1./3), *args, **kwargs)
 
 def process_args():
     
@@ -78,28 +45,6 @@ def process_args():
                             action      =   'store',
                             help        =   'Path to store computed files')
 
-    parser.add_argument(    '-c',
-                            '--cube-root',
-                            dest        =   'cbrt',
-                            required    =   False,
-                            action      =   'store_true',
-                            help        =   'Cube-root-scale the spectrogram')
-    
-    parser.add_argument(    '-l',
-                            '--log',
-                            dest        =   'log',
-                            required    =   False,
-                            action      =   'store_true',
-                            help        =   'Log-scale the spectrogram')
-
-    parser.add_argument(    '-q',
-                            '--quantile',
-                            dest        =   'quantile',
-                            required    =   False,
-                            type        =   float,
-                            default     =   None,
-                            help        =   'Quantile threshold for onsets')
-
     parser.add_argument(    '-m',
                             '--median',
                             dest        =   'median',
@@ -117,41 +62,14 @@ def process_args():
 
     return vars(parser.parse_args(sys.argv[1:]))
 
-def get_odf(**kw):
-
-    odf = None
-
-    if kw['log']:
-        if kw['quantile'] is None:
-            odf = onset_log_sum
-        else:
-            odf = onset_log_quantile
-    elif kw['cbrt']:
-        if kw['quantile'] is None:
-            odf = onset_cbrt_sum
-        else:
-            odf = onset_cbrt_quantile
-    else:
-        if kw['quantile'] is None:
-            odf = onset_linear_sum
-        else:
-            odf = onset_linear_quantile
-    return odf
-
 def process_file(input_file, **kwargs):
 
     output_file = os.path.basename(input_file)
     output_file = os.path.splitext(output_file)[0]
+    output_file = os.path.extsep.join([output_file, 'log'])
 
-    if kwargs['log']:
-        output_file = os.path.extsep.join([output_file, 'log'])
-    elif kwargs['cbrt']:
-        output_file = os.path.extsep.join([output_file, 'cbrt'])
-    else:
-        output_file = os.path.extsep.join([output_file, 'linear'])
-
-    if kwargs['quantile'] is not None:
-        output_file = os.path.extsep.join([output_file, 'q=%.2f' % kwargs['quantile']])
+    if kwargs['median']:
+        output_file = os.path.extsep.join([output_file, 'med'])
     else:
         output_file = os.path.extsep.join([output_file, 'sum'])
     
@@ -159,22 +77,18 @@ def process_file(input_file, **kwargs):
     output_file = os.path.extsep.join([output_file, 'csv'])
     output_file = os.path.join(kwargs['destination'], output_file)
 
-
     with open(input_file, 'r') as f:
         S = pickle.load(f)[SPECMAP[kwargs['spectrogram']]].astype(np.float32)
-        if kwargs['median']:
-            S = scipy.signal.medfilt2d(S, kernel_size=(1, MED_SIZE))
-        Z = S.max()
-        if Z > 0:
-            S = S / Z
 
-    onset = get_odf(**kwargs)
-    tempo, beats = librosa.beat.beat_track( onsets=onset(S, q=kwargs['quantile']),
-                                            sr=SR, n_fft=N_FFT, hop_length=HOP, tightness=TIGHTNESS)
+    if kwargs['median']:
+        odf = librosa.onset.onset_strength(S=S, sr=SR, hop_length=HOP, n_fft=N_FFT, aggregate=np.median)
+    else:
+        odf = librosa.onset.onset_strength(S=S, sr=SR, hop_length=HOP, n_fft=N_FFT, aggregate=np.mean)
 
-    times = librosa.frames_to_time(beats, sr=SR, hop_length=HOP)
-    np.savetxt(output_file, times, fmt='%0.3f', delimiter='\n')
-    pass
+    tempo, beats = librosa.beat.beat_track( onsets=odf, sr=SR, hop_length=HOP, tightness=TIGHTNESS)
+
+    times = librosa.frames_to_time(beats, sr=SR, hop_length=HOP, n_fft=N_FFT)
+    librosa.output.times_csv(output_file, times)
 
 if __name__ == '__main__':
     

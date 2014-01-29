@@ -26,6 +26,7 @@ def process_file(input_file, **kw):
     raw = raw.split(os.path.extsep)[0]
     truth_file = os.path.sep.join([kw['truth_path'], os.path.extsep.join([raw, 'txt'])])
 
+    igain_norm = np.log2(N_BINS)
     try:
         prediction  = np.loadtxt(input_file)
 
@@ -37,7 +38,7 @@ def process_file(input_file, **kw):
             scores.extend(MEB.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
             scores.append(MEB.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
             scores.append(MEB.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-            scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME))
+            scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME) * igain_norm)
             scores.append(MEB.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
             scores = np.array([scores])
             ALL_SCORES.append(scores)
