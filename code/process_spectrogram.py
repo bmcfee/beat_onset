@@ -55,27 +55,33 @@ def process_audio(infile):
     Lowrank = np.maximum(0.0, Lowrank)
     Sparse  = np.maximum(0.0, Sparse)
 
-    S       = librosa.feature.melspectrogram(librosa.logamplitude(D, ref_power=D.max()), 
+    D = np.abs(D)**2
+    Harm = np.abs(Harm)**2
+    Perc = np.abs(Perc)**2
+    Lowrank = np.abs(Lowrank)**2
+    Sparse = np.abs(Sparse)**2
+
+    S       = librosa.feature.melspectrogram(S=librosa.logamplitude(D, ref_power=D.max()), 
                                              sr=sr,
                                              n_mels=N_MELS,
                                              fmax=FMAX)
 
-    Harm       = librosa.feature.melspectrogram(librosa.logamplitude(Harm, ref_power=Harm.max()), 
+    Harm       = librosa.feature.melspectrogram(S=librosa.logamplitude(Harm, ref_power=Harm.max()), 
                                              sr=sr,
                                              n_mels=N_MELS,
                                              fmax=FMAX)
 
-    Perc       = librosa.feature.melspectrogram(librosa.logamplitude(Perc, ref_power=Perc.max()), 
+    Perc       = librosa.feature.melspectrogram(S=librosa.logamplitude(Perc, ref_power=Perc.max()), 
                                              sr=sr,
                                              n_mels=N_MELS,
                                              fmax=FMAX)
 
-    Lowrank       = librosa.feature.melspectrogram(librosa.logamplitude(Lowrank, ref_power=Lowrank.max()), 
+    Lowrank       = librosa.feature.melspectrogram(S=librosa.logamplitude(Lowrank, ref_power=Lowrank.max()), 
                                              sr=sr,
                                              n_mels=N_MELS,
                                              fmax=FMAX)
 
-    Sparse       = librosa.feature.melspectrogram(librosa.logamplitude(Sparse, ref_power=Sparse.max()), 
+    Sparse       = librosa.feature.melspectrogram(S=librosa.logamplitude(Sparse, ref_power=Sparse.max()), 
                                              sr=sr,
                                              n_mels=N_MELS,
                                              fmax=FMAX)
