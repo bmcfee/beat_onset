@@ -302,7 +302,7 @@ Ellis~\cite{ellis2007beat}.
 Each track was sampled at 22050Hz, and Mel-scaled magnitude spectrograms were computed 
 with a Hann-windowed short-time Fourier transform with 2048 samples ($\approx93$ms), hop 
 of 64 samples ($\approx3$ms), $d=128$ Mel bands, and a maximum frequency cutoff of 8000Hz.
-The HPSS window sizes were set as $w_p = w_h = 31$, and the power parameter was set 
+HPSS was performed with a hop of 512 samples, window sizes $w_p = w_h = 31$, and the power parameter was set 
 to $p=2.0$.
 Following Cand\`{e}s \etal~\cite{candes2011robust}, the RPCA parameter was set to
 ${\lambda = \sqrt{T}}$, where $T$ denotes the number of frames.
