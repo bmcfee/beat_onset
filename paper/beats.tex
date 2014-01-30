@@ -302,8 +302,8 @@ Ellis~\cite{ellis2007beat}.
 Each track was sampled at 22050Hz, and Mel-scaled magnitude spectrograms were computed 
 with a Hann-windowed short-time Fourier transform with 2048 samples ($\approx93$ms), hop 
 of 64 samples ($\approx3$ms), $d=128$ Mel bands, and a maximum frequency cutoff of 8000Hz.
-The HPSS window sizes were set as $w_p = w_h = 19$, and the power parameter was set 
-to $p=1.0$.
+The HPSS window sizes were set as $w_p = w_h = 31$, and the power parameter was set 
+to $p=2.0$.
 Following Cand\`{e}s \etal~\cite{candes2011robust}, the RPCA parameter was set to
 ${\lambda = \sqrt{T}}$, where $T$ denotes the number of frames.
 All algorithms were implemented in Python using \texttt{librosa}.\footnote{\url{http://github.com/bmcfee/librosa/}}
@@ -342,29 +342,60 @@ where there is less obvious benefit to source separation methods.
 \caption{Beat tracker performance on SMC Dataset2.\label{tab:results:smc2}}
 \begin{tabular}{lrrr}
 \toprule%
-Algorithm   &    AMLt               & F-measure         & Inf.\ gain\\
+Algorithm       &    AMLt        & F-measure        & Inf.\ gain\\
 \hline
-sum-Full        & \textbf{0.312}    & 0.362             & 0.839  \\
-sum-Harmonic    & \textbf{0.313}    & 0.363             & 0.835  \\
-sum-Percussive  & \textbf{0.304}    & 0.357             & 0.811  \\
-sum-Low-rank    & \textbf{0.310}    & 0.357             & 0.832  \\
+sum-Full        & \textbf{0.290} & 0.347            & 0.835  \\
+sum-Harmonic    & 0.222          & 0.283            & 0.655  \\
+sum-Percussive  & \textbf{0.322} & \textbf{0.366}   & 0.858  \\
+sum-Low-rank    & \textbf{0.300} & 0.349            & 0.838  \\
 \hline
-med-Full        & \textbf{0.336}    & 0.374             & \textbf{0.916}  \\
-med-Harmonic    & 0.329             & 0.368             & \textbf{0.916}  \\
-med-Percussive  & \textbf{0.364}    & \textbf{0.381}    & \textbf{0.946}\\
-med-Low-rank    & 0.331             & 0.376             & 0.901  \\
+med-Full        & 0.340          & \textbf{0.375}   & \textbf{0.965}  \\
+med-Harmonic    & 0.224          & 0.268            & 0.720 \\
+med-Percussive  & \textbf{0.366} & \textbf{0.383}   & \textbf{1.005} \\
+med-Low-rank    & \textbf{0.347} & \textbf{0.376}   & \textbf{0.965}  \\
 \hline
 B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
-                & 0.261             & \textbf{0.401}    & \textbf{0.917}  \\
+                & 0.261          & \textbf{0.401}   & \textbf{0.928} \\
 Degara \etal\hfill~\cite{degara2012reliability}
-                & \textbf{0.334}    & 0.348             & 0.888  \\
+                & \textbf{0.334} & 0.348            & 0.914 \\
 Ellis\hfill~\cite{ellis2007beat} 
-                & 0.208             & 0.352             & 0.607  \\
+                & 0.208          & 0.352            & 0.625 \\
 Klapuri \etal\hfill~\cite{klapuri2006analysis} 
-                & 0.339             & 0.362             & \textbf{0.926}  \\
+                & \textbf{0.339} & 0.363            & 0.940 \\
 \bottomrule%
 \end{tabular}
 \end{table}
+
+%% These were the original icassp submission results
+%
+% \begin{table}[t]
+% \centering
+% \caption{Beat tracker performance on SMC Dataset2.\label{tab:results:smc2}}
+% \begin{tabular}{lrrr}
+% \toprule%
+% Algorithm   &    AMLt               & F-measure         & Inf.\ gain\\
+% \hline
+% sum-Full        & \textbf{0.312}    & 0.362             & 0.839  \\
+% sum-Harmonic    & \textbf{0.313}    & 0.363             & 0.835  \\
+% sum-Percussive  & \textbf{0.304}    & 0.357             & 0.811  \\
+% sum-Low-rank    & \textbf{0.310}    & 0.357             & 0.832  \\
+% \hline
+% med-Full        & \textbf{0.336}    & 0.374             & \textbf{0.916}  \\
+% med-Harmonic    & 0.329             & 0.368             & \textbf{0.916}  \\
+% med-Percussive  & \textbf{0.364}    & \textbf{0.381}    & \textbf{0.946}\\
+% med-Low-rank    & 0.331             & 0.376             & 0.901  \\
+% \hline
+% B\"{o}ck \& Schedl\hfill~\cite{bock2011enhanced} 
+%                 & 0.261             & \textbf{0.401}    & \textbf{0.917}  \\
+% Degara \etal\hfill~\cite{degara2012reliability}
+%                 & \textbf{0.334}    & 0.348             & 0.888  \\
+% Ellis\hfill~\cite{ellis2007beat} 
+%                 & 0.208             & 0.352             & 0.607  \\
+% Klapuri \etal\hfill~\cite{klapuri2006analysis} 
+%                 & 0.339             & 0.362             & \textbf{0.926}  \\
+% \bottomrule%
+% \end{tabular}
+% \end{table}
 
 % \begin{table}[t]
 % \centering
