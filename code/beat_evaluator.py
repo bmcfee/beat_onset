@@ -27,12 +27,10 @@ def process_file(input_file, **kw):
 
     igain_norm = np.log2(N_BINS)
     try:
-#         prediction  = np.loadtxt(input_file)
+        print input_file, truth_file
 
         prediction   = mir_eval.io.load_events(input_file)[0]
         truth        = mir_eval.io.load_events(truth_file)[0]
-        #truth       = np.loadtxt(truth_file)
-        ALL_SCORES = []
         scores = []
         scores.append(mir_eval.beat.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
         scores.extend(mir_eval.beat.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
@@ -41,16 +39,12 @@ def process_file(input_file, **kw):
         scores.append(mir_eval.beat.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME) * igain_norm)
         scores.append(mir_eval.beat.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
         scores = np.array([scores])
-        ALL_SCORES.append(scores)
-        ALL_SCORES = np.array(ALL_SCORES)
-        ALL_SCORES = np.mean(ALL_SCORES, axis=0)
 
     except:
         print 'Empty prediction file: ', raw
-        ALL_SCORES = np.zeros((1,9))
+        scores  = np.zeros((1,9))
 
-    np.savetxt(output_file, ALL_SCORES, delimiter=',', fmt='%0.4f', header=HEADER)
-    pass
+    np.savetxt(output_file, scores, delimiter=',', fmt='%0.4f', header=HEADER)
 
 def process_args():
 
