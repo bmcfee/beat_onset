@@ -13,8 +13,6 @@ import mir_eval
 from joblib import Parallel, delayed
 
 # bins for information gain, set to match holzapfel'12
-N_BINS = 40
-MIN_BEAT_TIME = 5.0
 HEADER = 'Cemgil, CMLc, CMLt, AMLc, AMLt, F-Meas, Goto, I.Gain, P_score'
 
 def process_file(input_file, **kw):
@@ -25,19 +23,18 @@ def process_file(input_file, **kw):
     raw = raw.split(os.path.extsep)[0]
     truth_file = os.path.sep.join([kw['truth_path'], os.path.extsep.join([raw, 'txt'])])
 
-    igain_norm = np.log2(N_BINS)
     try:
         print input_file, truth_file
 
         prediction   = mir_eval.io.load_events(input_file)[0]
         truth        = mir_eval.io.load_events(truth_file)[0]
         scores = []
-        scores.append(mir_eval.beat.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
-        scores.extend(mir_eval.beat.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(mir_eval.beat.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(mir_eval.beat.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-        scores.append(mir_eval.beat.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME) * igain_norm)
-        scores.append(mir_eval.beat.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(mir_eval.beat.cemgil(truth, prediction)[0])
+        scores.extend(mir_eval.beat.continuity(truth, prediction))
+        scores.append(mir_eval.beat.f_measure(truth, prediction))
+        scores.append(mir_eval.beat.goto(truth, prediction))
+        scores.append(mir_eval.beat.information_gain(truth, prediction))
+        scores.append(mir_eval.beat.p_score(truth, prediction))
         scores = np.array([scores])
 
     except:
