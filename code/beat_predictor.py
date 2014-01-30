@@ -23,7 +23,7 @@ MED_SIZE = 5
 
 # Order: 
 #   full, harmonic, percussive, lowrank, sparse
-SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4, 'hp': 5}
+SPECMAP = {'full': 0, 'harmonic': 1, 'percussive': 2, 'lowrank': 3, 'sparse': 4}
 
 def process_args():
     
@@ -50,7 +50,7 @@ def process_args():
                             dest        =   'median',
                             required    =   False,
                             action      =   'store_true',
-                            help        =   'median-filter the spectrogram')
+                            help        =   'median onset aggregation')
 
     parser.add_argument(    '-s',
                             '--spectrogram',
