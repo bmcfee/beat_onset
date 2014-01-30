@@ -8,8 +8,7 @@ import glob
 import argparse
 
 import numpy as np
-from mir_eval.util import multiline
-import mir_eval.beat as MEB
+import mir_eval
 
 from joblib import Parallel, delayed
 
@@ -28,21 +27,21 @@ def process_file(input_file, **kw):
 
     igain_norm = np.log2(N_BINS)
     try:
-        prediction  = np.loadtxt(input_file)
+#         prediction  = np.loadtxt(input_file)
 
+        prediction   = mir_eval.io.load_events(input_file)[0]
+        truth        = mir_eval.io.load_events(truth_file)[0]
         #truth       = np.loadtxt(truth_file)
         ALL_SCORES = []
-        for truth in multiline(truth_file):
-            scores = []
-            scores.append(MEB.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
-            scores.extend(MEB.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-            scores.append(MEB.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-            scores.append(MEB.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-            scores.append(MEB.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME) * igain_norm)
-            scores.append(MEB.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
-            scores = np.array([scores])
-            ALL_SCORES.append(scores)
-
+        scores = []
+        scores.append(mir_eval.beat.cemgil(truth, prediction, min_beat_time=MIN_BEAT_TIME)[0])
+        scores.extend(mir_eval.beat.continuity(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(mir_eval.beat.f_measure(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(mir_eval.beat.goto(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores.append(mir_eval.beat.information_gain(truth, prediction, bins=N_BINS, min_beat_time=MIN_BEAT_TIME) * igain_norm)
+        scores.append(mir_eval.beat.p_score(truth, prediction, min_beat_time=MIN_BEAT_TIME))
+        scores = np.array([scores])
+        ALL_SCORES.append(scores)
         ALL_SCORES = np.array(ALL_SCORES)
         ALL_SCORES = np.mean(ALL_SCORES, axis=0)
 
