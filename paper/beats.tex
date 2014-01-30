@@ -322,18 +322,16 @@ and hop (32 samples, 4ms), and fewer Mel bands ($d=32$).\footnote{The present
 implementation also includes a small constant timing correction, which improves 
 performance for some metrics, but is known to not affect the information gain
 score~\cite{davies2009evaluation}.}
-Regardless of spectrogram decomposition method, all sum-based methods (first group of 
-results) perform comparably well, and although there are slight degradations, each give 
-a modest improvement over the original implementation.
+Except for the harmonic component method, all sum-based methods (first group of 
+results) perform comparably well. 
 
 Replacing sum onset aggregation with median aggregation (second group of results)
-boosts performance uniformly: for each decomposition and each metric, median
+boosts performance uniformly: for each decomposition (except harmonic) and each metric, median
 aggregation only improves the score.  The largest improvement is observed on the
-percussive component, which achieved the lowest scores with sum aggregation, but the
-highest with median aggregation. Across all metrics, the combination of median aggregation with 
-the percussive component ties for the highest score among all methods.
+percussive component. 
+Across all metrics, applying median aggregation to the percussive component ties for the highest score among all methods.
 
-The RPCA method (Low-rank) did not yield improvements over either the full spectrogram or HPSS methods.
+The RPCA method (Low-rank) did not yield significant improvements over either the full spectrogram or HPSS methods.
 This may be due to the fact that the dataset consists primarily of instrumental (even single-instrument) recordings, 
 where there is less obvious benefit to source separation methods.  
 
